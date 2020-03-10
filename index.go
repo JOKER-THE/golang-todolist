@@ -61,7 +61,17 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
         task := models.NewTask(id, title, description)
         tasks[task.Id] = task
     }
-    
+
+    http.Redirect(w, r, "/", 302)
+}
+
+func deleteHandler(w http.ResponseWriter, r *http.Request) {
+    id := r.FormValue("id")
+    if id == "" {
+        http.NotFound(w, r)
+    }
+
+    delete(tasks, id)
     http.Redirect(w, r, "/", 302)
 }
 
@@ -71,6 +81,7 @@ func main() {
     http.HandleFunc("/", indexHandler)
     http.HandleFunc("/create", createHandler)
     http.HandleFunc("/update", updateHandler)
+    http.HandleFunc("/delete", deleteHandler)
     http.HandleFunc("/save", saveHandler)
     http.ListenAndServe(":8181", nil)
 }
