@@ -2,14 +2,20 @@ package main
 
 import (
     "fmt"
+	"html/template"
     "net/http"
 )
 
-func index(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "Hello, World!")
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+    t, err := template.ParseFiles("views/index.html", "templates/header.html", "templates/footer.html")
+	if err != nil {
+		fmt.Fprintf(w, err.Error())
+	}
+	t.ExecuteTemplate(w, "index", nil)
 }
 
 func main() {
-    http.HandleFunc("/", index)
+	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets/"))))
+    http.HandleFunc("/", indexHandler)
     http.ListenAndServe(":8181", nil)
 }
