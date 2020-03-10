@@ -26,19 +26,42 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func createHandler(w http.ResponseWriter, r *http.Request) {
-    t, err := template.ParseFiles("views/create.html", "templates/header.html", "templates/footer.html")
+    t, err := template.ParseFiles("views/form.html", "templates/header.html", "templates/footer.html")
     if err != nil {
         fmt.Fprintf(w, err.Error())
     }
-    t.ExecuteTemplate(w, "create", nil)
+    t.ExecuteTemplate(w, "form", nil)
+}
+
+func updateHandler(w http.ResponseWriter, r *http.Request) {
+    t, err := template.ParseFiles("views/form.html", "templates/header.html", "templates/footer.html")
+    if err != nil {
+        fmt.Fprintf(w, err.Error())
+    }
+    id := r.FormValue("id")
+    task, found := tasks[id]
+    if !found {
+        http.NotFound(w, r)
+    }
+    t.ExecuteTemplate(w, "form", task)
 }
 
 func saveHandler(w http.ResponseWriter, r *http.Request) {
-    id := GenerateId()
+    id := r.FormValue("id")
     title := r.FormValue("title")
     description := r.FormValue("description")
-    task := models.NewTask(id, title, description)
-    tasks[task.Id] = task
+
+    var task *models.Task
+    if id != "" {
+        task = tasks[id]
+        task.Title = title
+        task.Description = description
+    } else {
+        id = GenerateId()
+        task := models.NewTask(id, title, description)
+        tasks[task.Id] = task
+    }
+    
     http.Redirect(w, r, "/", 302)
 }
 
@@ -47,6 +70,7 @@ func main() {
     http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets/"))))
     http.HandleFunc("/", indexHandler)
     http.HandleFunc("/create", createHandler)
+    http.HandleFunc("/update", updateHandler)
     http.HandleFunc("/save", saveHandler)
     http.ListenAndServe(":8181", nil)
 }
