@@ -3,9 +3,18 @@
 {{ template "header" }}
 
 <div class="container">
+    {{ range $key, $value := . }}
     <div class="row">
-    	<p>Hello, World</p>
+        <div class="col-md-4">
+            <h1>{{ $value.Title }}</h1>
+        </div>
     </div>
+    <div class="row">
+        <div class="col-md-4">
+            <p>{{ $value.Description }}</p>
+        </div>
+    </div>
+    {{ end }}
 </div>
 
 {{ template "footer" }}
